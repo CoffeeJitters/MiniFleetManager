@@ -9,6 +9,8 @@ import { format } from 'date-fns'
  * Generate ICS file for a maintenance schedule
  * Usage: /api/calendar/ics?scheduleId=xxx
  */
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
