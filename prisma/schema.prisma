@@ -1,0 +1,176 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  MANAGER
+  DRIVER
+}
+
+enum VehicleStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  RETIRED
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum ReminderChannel {
+  EMAIL
+  SMS
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users            User[]
+  vehicles         Vehicle[]
+  maintenanceTemplates MaintenanceTemplate[]
+  maintenanceSchedules MaintenanceSchedule[]
+  serviceEvents    ServiceEvent[]
+  reminders        Reminder[]
+
+  @@map("companies")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      UserRole @default(DRIVER)
+  companyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  assignedVehicles Vehicle[] @relation("VehicleDriver")
+
+  @@map("users")
+}
+
+model Vehicle {
+  id              String         @id @default(cuid())
+  make            String
+  model           String
+  year            Int
+  vin             String?        @unique
+  licensePlate    String?
+  currentOdometer Int            @default(0)
+  inServiceDate   DateTime?
+  status          VehicleStatus  @default(ACTIVE)
+  companyId       String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  drivers User[] @relation("VehicleDriver")
+
+  maintenanceSchedules MaintenanceSchedule[]
+  serviceEvents         ServiceEvent[]
+  reminders             Reminder[]
+
+  @@map("vehicles")
+}
+
+model MaintenanceTemplate {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  intervalMonths Int?
+  intervalMiles  Int?
+  checklistItems String[] // Array of checklist item strings
+  isBuiltIn     Boolean  @default(false)
+  companyId     String?  // null for built-in templates
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  maintenanceSchedules MaintenanceSchedule[]
+  serviceEvents         ServiceEvent[]
+
+  @@map("maintenance_templates")
+}
+
+model MaintenanceSchedule {
+  id                String   @id @default(cuid())
+  vehicleId         String
+  templateId        String
+  lastServiceDate   DateTime?
+  lastServiceOdometer Int?
+  nextDueDate       DateTime?
+  nextDueOdometer   Int?
+  companyId         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  vehicle  Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  template MaintenanceTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  reminders Reminder[]
+
+  @@unique([vehicleId, templateId])
+  @@map("maintenance_schedules")
+}
+
+model ServiceEvent {
+  id                String   @id @default(cuid())
+  vehicleId         String
+  templateId        String
+  performedBy       String?
+  performedAt       DateTime @default(now())
+  odometerAtService Int
+  notes             String?
+  checklistCompleted Boolean @default(false)
+  companyId         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  vehicle  Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  template MaintenanceTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("service_events")
+}
+
+model Reminder {
+  id                String          @id @default(cuid())
+  vehicleId         String
+  scheduleId        String
+  dueDate           DateTime
+  channel           ReminderChannel
+  status            ReminderStatus  @default(PENDING)
+  sentAt            DateTime?
+  companyId         String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  vehicle  Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  schedule MaintenanceSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("reminders")
+}
+
+
