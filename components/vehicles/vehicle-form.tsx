@@ -24,7 +24,15 @@ const vehicleSchema = z.object({
 
 type VehicleFormData = z.infer<typeof vehicleSchema>
 
-export function VehicleForm({ vehicleId, initialData }: { vehicleId?: string; initialData?: any }) {
+export function VehicleForm({
+  vehicleId,
+  initialData,
+  hasActiveSubscription = true,
+}: {
+  vehicleId?: string
+  initialData?: any
+  hasActiveSubscription?: boolean
+}) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -160,8 +168,17 @@ export function VehicleForm({ vehicleId, initialData }: { vehicleId?: string; in
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded">{error}</div>
           )}
 
+          {!hasActiveSubscription && (
+            <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded">
+              Active subscription required to create or edit vehicles.{' '}
+              <a href="/billing" className="underline font-medium">
+                Manage subscription
+              </a>
+            </div>
+          )}
+
           <div className="flex gap-4">
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !hasActiveSubscription}>
               {loading ? 'Saving...' : vehicleId ? 'Update Vehicle' : 'Create Vehicle'}
             </Button>
             <Button type="button" variant="outline" onClick={() => router.back()}>

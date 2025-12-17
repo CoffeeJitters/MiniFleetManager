@@ -26,9 +26,11 @@ type LogServiceFormData = z.infer<typeof logServiceSchema>
 export function LogServiceForm({
   vehicle,
   defaultTemplateId,
+  hasActiveSubscription = true,
 }: {
   vehicle: any
   defaultTemplateId?: string
+  hasActiveSubscription?: boolean
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -184,8 +186,17 @@ export function LogServiceForm({
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded">{error}</div>
           )}
 
+          {!hasActiveSubscription && (
+            <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded">
+              Active subscription required to log services.{' '}
+              <a href="/billing" className="underline font-medium">
+                Manage subscription
+              </a>
+            </div>
+          )}
+
           <div className="flex gap-4">
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !hasActiveSubscription}>
               {loading ? 'Logging Service...' : 'Log Service'}
             </Button>
             <Button type="button" variant="outline" onClick={() => router.back()}>

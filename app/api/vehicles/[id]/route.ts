@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { requireRole, requireCompanyScope } from '@/lib/middleware'
+import { requireRole, requireCompanyScope, hasActiveSubscription } from '@/lib/middleware'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -35,6 +35,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     await requireRole(['OWNER', 'MANAGER'])
+
+    const hasActive = await hasActiveSubscription(session.user.companyId)
+    if (!hasActive) {
+      return NextResponse.json(
+        { message: 'Active subscription required for this action' },
+        { status: 403 }
+      )
+    }
 
     const vehicle = await prisma.vehicle.findUnique({
       where: { id: params.id },
@@ -88,6 +96,14 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
 
     await requireRole(['OWNER', 'MANAGER'])
+
+    const hasActive = await hasActiveSubscription(session.user.companyId)
+    if (!hasActive) {
+      return NextResponse.json(
+        { message: 'Active subscription required for this action' },
+        { status: 403 }
+      )
+    }
 
     const vehicle = await prisma.vehicle.findUnique({
       where: { id: params.id },

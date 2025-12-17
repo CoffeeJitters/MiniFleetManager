@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { requireRole } from '@/lib/middleware'
+import { requireRole, hasActiveSubscription } from '@/lib/middleware'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: Request) {
@@ -36,6 +36,14 @@ export async function POST(request: Request) {
     }
 
     await requireRole(['OWNER', 'MANAGER'])
+
+    const hasActive = await hasActiveSubscription(session.user.companyId)
+    if (!hasActive) {
+      return NextResponse.json(
+        { message: 'Active subscription required for this action' },
+        { status: 403 }
+      )
+    }
 
     const body = await request.json()
     const { name, description, intervalMonths, intervalMiles, checklistItems } = body

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { requireCompanyScope } from '@/lib/middleware'
+import { requireCompanyScope, hasActiveSubscription } from '@/lib/middleware'
 import { prisma } from '@/lib/prisma'
 import { format } from 'date-fns'
 
@@ -38,6 +38,14 @@ export async function GET(request: Request) {
     }
 
     requireCompanyScope(schedule.companyId, session.user.companyId)
+
+    const hasActive = await hasActiveSubscription(session.user.companyId)
+    if (!hasActive) {
+      return NextResponse.json(
+        { message: 'Active subscription required for this action' },
+        { status: 403 }
+      )
+    }
 
     if (!schedule.nextDueDate) {
       return NextResponse.json({ message: 'No due date set for this schedule' }, { status: 400 })

@@ -34,11 +34,23 @@ enum ReminderChannel {
   SMS
 }
 
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+}
+
 model Company {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  name                 String
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId  String?  @unique
+  subscriptionStatus   SubscriptionStatus @default(TRIAL)
+  subscriptionPlanId   String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   users            User[]
   vehicles         Vehicle[]
@@ -46,6 +58,8 @@ model Company {
   maintenanceSchedules MaintenanceSchedule[]
   serviceEvents    ServiceEvent[]
   reminders        Reminder[]
+  reminderSettings ReminderSettings?
+  subscription     Subscription?
 
   @@map("companies")
 }
@@ -171,6 +185,54 @@ model Reminder {
   company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@map("reminders")
+}
+
+model ReminderSettings {
+  id        String          @id @default(cuid())
+  companyId String          @unique
+  email     String?
+  phone     String?
+  channel   ReminderChannel @default(EMAIL)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("reminder_settings")
+}
+
+model Plan {
+  id                String   @id @default(cuid())
+  stripePriceId     String   @unique
+  name              String
+  description       String?
+  price             Int      // Price in cents
+  interval          String   // "month" or "year"
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                String            @id @default(cuid())
+  companyId         String            @unique
+  planId            String
+  stripeSubscriptionId String?        @unique
+  status            SubscriptionStatus @default(TRIAL)
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean          @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  plan    Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
 }
 
 

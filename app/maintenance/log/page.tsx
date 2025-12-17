@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { requireRole } from '@/lib/middleware'
+import { requireRole, hasActiveSubscription } from '@/lib/middleware'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { LogServiceForm } from '@/components/maintenance/log-service-form'
 
@@ -47,6 +47,8 @@ export default async function LogServicePage({
     redirect('/vehicles')
   }
 
+  const hasActive = await hasActiveSubscription(session.user.companyId)
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -59,6 +61,7 @@ export default async function LogServicePage({
         <LogServiceForm
           vehicle={vehicle}
           defaultTemplateId={searchParams.templateId}
+          hasActiveSubscription={hasActive}
         />
       </div>
     </DashboardLayout>

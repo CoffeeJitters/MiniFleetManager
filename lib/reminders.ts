@@ -1,5 +1,15 @@
 import { prisma } from './prisma'
 import { addDays, differenceInDays } from 'date-fns'
+import { Resend } from 'resend'
+import twilio from 'twilio'
+import { ACTIVE_SUBSCRIPTION_STATUSES } from './middleware'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+const twilioClient = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+)
 
 /**
  * Scans all maintenance schedules and creates reminders for upcoming/overdue services
@@ -14,6 +24,11 @@ export async function scanAndCreateReminders() {
     where: {
       nextDueDate: {
         not: null,
+      },
+      company: {
+        subscriptionStatus: {
+          in: ACTIVE_SUBSCRIPTION_STATUSES,
+        },
       },
     },
     include: {
@@ -105,6 +120,11 @@ export async function processPendingReminders() {
   const pendingReminders = await prisma.reminder.findMany({
     where: {
       status: 'PENDING',
+      company: {
+        subscriptionStatus: {
+          in: ACTIVE_SUBSCRIPTION_STATUSES,
+        },
+      },
     },
     include: {
       vehicle: true,
@@ -160,8 +180,7 @@ export async function processPendingReminders() {
 }
 
 /**
- * Send email reminder (stub implementation)
- * In production, this would use a service like SendGrid, AWS SES, etc.
+ * Send email reminder using Resend
  */
 async function sendEmailReminder(reminder: any) {
   const vehicle = reminder.vehicle
@@ -169,37 +188,32 @@ async function sendEmailReminder(reminder: any) {
   const dueDate = new Date(reminder.dueDate)
 
   const subject = `Maintenance Reminder: ${template.name} for ${vehicle.make} ${vehicle.model}`
-  const body = `
-Maintenance Reminder
+  const html = `
+    <h2>Maintenance Reminder</h2>
+    <p><strong>Vehicle:</strong> ${vehicle.year} ${vehicle.make} ${vehicle.model}</p>
+    <p><strong>Service:</strong> ${template.name}</p>
+    <p><strong>Due Date:</strong> ${dueDate.toLocaleDateString()}</p>
+    <p>Please schedule this maintenance service.</p>
+    <p><em>This is an automated reminder from MiniFleet Manager.</em></p>
+  `
 
-Vehicle: ${vehicle.year} ${vehicle.make} ${vehicle.model}
-Service: ${template.name}
-Due Date: ${dueDate.toLocaleDateString()}
+  const recipientEmails = reminder.company.users.map((u: any) => u.email)
 
-Please schedule this maintenance service.
-
-This is an automated reminder from MiniFleet Manager.
-  `.trim()
-
-  // Stub: In production, send actual email
-  if (process.env.NODE_ENV === 'development') {
-    console.log('📧 EMAIL REMINDER (stub):')
-    console.log(`To: ${reminder.company.users.map((u: any) => u.email).join(', ')}`)
-    console.log(`Subject: ${subject}`)
-    console.log(`Body:\n${body}`)
+  try {
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
+      to: recipientEmails,
+      subject,
+      html,
+    })
+  } catch (error: any) {
+    console.error('Failed to send email reminder:', error)
+    throw new Error(`Failed to send email: ${error.message}`)
   }
-
-  // TODO: Integrate with email service (SendGrid, AWS SES, etc.)
-  // await emailService.send({
-  //   to: reminder.company.users.map(u => u.email),
-  //   subject,
-  //   body,
-  // })
 }
 
 /**
- * Send SMS reminder (stub implementation)
- * In production, this would use Twilio or similar service
+ * Send SMS reminder using Twilio
  */
 async function sendSMSReminder(reminder: any) {
   const vehicle = reminder.vehicle
@@ -208,18 +222,35 @@ async function sendSMSReminder(reminder: any) {
 
   const message = `Maintenance reminder: ${template.name} for ${vehicle.make} ${vehicle.model} due ${dueDate.toLocaleDateString()}`
 
-  // Stub: In production, send actual SMS via Twilio
-  if (process.env.NODE_ENV === 'development') {
-    console.log('📱 SMS REMINDER (stub):')
-    console.log(`Message: ${message}`)
-    console.log(`(Would send to phone numbers associated with company users)`)
+  // Get phone number from reminder settings
+  const settings = await prisma.reminderSettings.findUnique({
+    where: { companyId: reminder.companyId },
+  })
+
+  if (!settings?.phone) {
+    throw new Error('No phone number configured for SMS reminders')
   }
 
-  // TODO: Integrate with SMS service (Twilio, etc.)
-  // await smsService.send({
-  //   to: phoneNumber,
-  //   message,
-  // })
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+    throw new Error('Twilio credentials are not configured')
+  }
+
+  if (!process.env.TWILIO_PHONE_NUMBER) {
+    throw new Error('TWILIO_PHONE_NUMBER is not set')
+  }
+
+  try {
+    const result = await twilioClient.messages.create({
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: settings.phone,
+      body: message,
+    })
+    console.log('✅ SMS reminder sent successfully!', result.sid)
+    return result
+  } catch (error: any) {
+    console.error('Failed to send SMS reminder:', error)
+    throw new Error(`Failed to send SMS: ${error.message}`)
+  }
 }
 
 

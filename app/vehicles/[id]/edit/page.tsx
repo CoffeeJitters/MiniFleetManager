@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { requireRole } from '@/lib/middleware'
+import { requireRole, hasActiveSubscription } from '@/lib/middleware'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { VehicleForm } from '@/components/vehicles/vehicle-form'
 
@@ -32,6 +32,8 @@ export default async function EditVehiclePage({ params }: { params: { id: string
     redirect('/vehicles')
   }
 
+  const hasActive = await hasActiveSubscription(session.user.companyId)
+
   const initialData = {
     ...vehicle,
     inServiceDate: vehicle.inServiceDate ? vehicle.inServiceDate.toISOString().split('T')[0] : '',
@@ -44,7 +46,7 @@ export default async function EditVehiclePage({ params }: { params: { id: string
           <h1 className="text-3xl font-bold">Edit Vehicle</h1>
           <p className="text-gray-600 mt-1">Update vehicle information</p>
         </div>
-        <VehicleForm vehicleId={vehicle.id} initialData={initialData} />
+        <VehicleForm vehicleId={vehicle.id} initialData={initialData} hasActiveSubscription={hasActive} />
       </div>
     </DashboardLayout>
   )

@@ -22,7 +22,15 @@ const templateSchema = z.object({
 
 type TemplateFormData = z.infer<typeof templateSchema>
 
-export function MaintenanceTemplateForm({ templateId, initialData }: { templateId?: string; initialData?: any }) {
+export function MaintenanceTemplateForm({
+  templateId,
+  initialData,
+  hasActiveSubscription = true,
+}: {
+  templateId?: string
+  initialData?: any
+  hasActiveSubscription?: boolean
+}) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -187,8 +195,17 @@ export function MaintenanceTemplateForm({ templateId, initialData }: { templateI
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded">{error}</div>
           )}
 
+          {!hasActiveSubscription && (
+            <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded">
+              Active subscription required to create templates.{' '}
+              <a href="/billing" className="underline font-medium">
+                Manage subscription
+              </a>
+            </div>
+          )}
+
           <div className="flex gap-4">
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !hasActiveSubscription}>
               {loading ? 'Saving...' : templateId ? 'Update Template' : 'Create Template'}
             </Button>
             <Button type="button" variant="outline" onClick={() => router.back()}>

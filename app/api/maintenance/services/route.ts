@@ -1,29 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { requireRole, requireCompanyScope } from '@/lib/middleware'
+import { requireRole, requireCompanyScope, hasActiveSubscription } from '@/lib/middleware'
 import { prisma } from '@/lib/prisma'
-import { addMonths } from 'date-fns'
-
-function calculateNextDueDate(
-  lastServiceDate: Date,
-  intervalMonths: number | null,
-  intervalMiles: number | null,
-  lastServiceOdometer: number
-): { nextDueDate: Date | null; nextDueOdometer: number | null } {
-  let nextDueDate: Date | null = null
-  let nextDueOdometer: number | null = null
-
-  if (intervalMonths) {
-    nextDueDate = addMonths(lastServiceDate, intervalMonths)
-  }
-
-  if (intervalMiles) {
-    nextDueOdometer = lastServiceOdometer + intervalMiles
-  }
-
-  return { nextDueDate, nextDueOdometer }
-}
+import { calculateNextDueDate } from '@/lib/utils'
 
 export async function POST(request: Request) {
   try {
@@ -33,6 +13,14 @@ export async function POST(request: Request) {
     }
 
     await requireRole(['OWNER', 'MANAGER'])
+
+    const hasActive = await hasActiveSubscription(session.user.companyId)
+    if (!hasActive) {
+      return NextResponse.json(
+        { message: 'Active subscription required for this action' },
+        { status: 403 }
+      )
+    }
 
     const body = await request.json()
     const {

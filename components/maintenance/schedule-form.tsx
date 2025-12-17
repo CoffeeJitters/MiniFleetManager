@@ -25,11 +25,13 @@ export function ScheduleMaintenanceForm({
   templates,
   defaultVehicleId,
   defaultTemplateId,
+  hasActiveSubscription = true,
 }: {
   vehicles: any[]
   templates: any[]
   defaultVehicleId?: string
   defaultTemplateId?: string
+  hasActiveSubscription?: boolean
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -180,8 +182,17 @@ export function ScheduleMaintenanceForm({
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded">{error}</div>
           )}
 
+          {!hasActiveSubscription && (
+            <div className="text-sm text-amber-600 bg-amber-50 p-3 rounded">
+              Active subscription required to create schedules.{' '}
+              <a href="/billing" className="underline font-medium">
+                Manage subscription
+              </a>
+            </div>
+          )}
+
           <div className="flex gap-4">
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !hasActiveSubscription}>
               {loading ? 'Creating...' : 'Create Schedule'}
             </Button>
             <Button type="button" variant="outline" onClick={() => router.back()}>

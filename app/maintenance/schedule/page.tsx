@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { requireRole } from '@/lib/middleware'
+import { requireRole, hasActiveSubscription } from '@/lib/middleware'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { ScheduleMaintenanceForm } from '@/components/maintenance/schedule-form'
 
@@ -39,6 +39,7 @@ export default async function ScheduleMaintenancePage({
   await requireRole(['OWNER', 'MANAGER'])
 
   const { vehicles, templates } = await getVehiclesAndTemplates(session.user.companyId)
+  const hasActive = await hasActiveSubscription(session.user.companyId)
 
   return (
     <DashboardLayout>
@@ -52,6 +53,7 @@ export default async function ScheduleMaintenancePage({
           templates={templates}
           defaultVehicleId={searchParams.vehicleId}
           defaultTemplateId={searchParams.templateId}
+          hasActiveSubscription={hasActive}
         />
       </div>
     </DashboardLayout>
