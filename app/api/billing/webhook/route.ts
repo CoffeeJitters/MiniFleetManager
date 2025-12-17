@@ -4,6 +4,9 @@ import Stripe from 'stripe'
 import { stripe, STRIPE_STATUS_MAP } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
+// Type alias to avoid conflict with Prisma's Subscription model
+type StripeSubscription = Stripe.Subscription
+
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
@@ -40,9 +43,9 @@ export async function POST(request: Request) {
           break
         }
 
-        const stripeSubscription = (await stripe.subscriptions.retrieve(
+        const stripeSubscription: StripeSubscription = await stripe.subscriptions.retrieve(
           session.subscription as string
-        )) as Stripe.Subscription
+        )
         const priceId = stripeSubscription.items.data[0]?.price.id
 
         if (!priceId) {
@@ -112,21 +115,21 @@ export async function POST(request: Request) {
 
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
-        const stripeSubscription: Stripe.Subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as Stripe.Subscription
         const company = await prisma.company.findUnique({
-          where: { stripeSubscriptionId: stripeSubscription.id },
+          where: { stripeSubscriptionId: subscription.id },
         })
 
         if (!company) {
-          console.error('Company not found for subscription:', stripeSubscription.id)
+          console.error('Company not found for subscription:', subscription.id)
           break
         }
 
-        let status = STRIPE_STATUS_MAP[stripeSubscription.status] || 'CANCELED'
+        let status = STRIPE_STATUS_MAP[subscription.status] || 'CANCELED'
         
         // If subscription is canceled and we're past the period end, ensure it's marked as CANCELED
-        if (stripeSubscription.status === 'canceled') {
-          const periodEnd = new Date(stripeSubscription.current_period_end * 1000)
+        if (subscription.status === 'canceled') {
+          const periodEnd = new Date(subscription.current_period_end * 1000)
           if (periodEnd < new Date()) {
             status = 'CANCELED'
           }
@@ -142,12 +145,12 @@ export async function POST(request: Request) {
 
         // Update subscription record with all relevant fields
         await prisma.subscription.updateMany({
-          where: { stripeSubscriptionId: stripeSubscription.id },
+          where: { stripeSubscriptionId: subscription.id },
           data: {
             status,
-            currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
-            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
-            cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+            currentPeriodStart: new Date(subscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+            cancelAtPeriodEnd: subscription.cancel_at_period_end,
           },
         })
 
