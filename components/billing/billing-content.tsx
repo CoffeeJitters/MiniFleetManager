@@ -100,6 +100,23 @@ export function BillingContent({ company, plans, subscription, userRole }: Billi
       return
     }
 
+    // If subscription is canceled, create a new checkout session instead of opening portal
+    if (isCanceled && currentPlan) {
+      handleUpgrade(currentPlan.stripePriceId)
+      return
+    }
+
+    // If subscription is canceled but no current plan, direct user to available plans
+    if (isCanceled && !currentPlan) {
+      alert('Please select a plan from the Available Plans section below to reactivate your subscription.')
+      // Scroll to available plans section
+      const plansSection = document.getElementById('available-plans')
+      if (plansSection) {
+        plansSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -231,7 +248,7 @@ export function BillingContent({ company, plans, subscription, userRole }: Billi
 
       {/* Available Plans */}
       {plans.length > 0 && (
-        <div>
+        <div id="available-plans">
           <h2 className="text-2xl font-bold mb-4">Available Plans</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {plans.map((plan) => (
@@ -239,7 +256,7 @@ export function BillingContent({ company, plans, subscription, userRole }: Billi
                 key={plan.id}
                 plan={plan}
                 currentPlanId={currentPlan?.id}
-                isCurrentPlan={plan.id === currentPlan?.id}
+                isCurrentPlan={plan.id === currentPlan?.id} // Show as current even if canceled, so users can see which plan they had
                 onUpgrade={handleUpgrade}
                 loading={loading && upgradingPlanId === plan.stripePriceId}
               />
