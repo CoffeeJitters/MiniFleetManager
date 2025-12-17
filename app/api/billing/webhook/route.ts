@@ -40,9 +40,9 @@ export async function POST(request: Request) {
           break
         }
 
-        const subscription: Stripe.Subscription = await stripe.subscriptions.retrieve(
+        const subscription = (await stripe.subscriptions.retrieve(
           session.subscription as string
-        )
+        )) as Stripe.Subscription
         const priceId = subscription.items.data[0]?.price.id
 
         if (!priceId) {
