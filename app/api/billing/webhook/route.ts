@@ -40,10 +40,10 @@ export async function POST(request: Request) {
           break
         }
 
-        const subscription = (await stripe.subscriptions.retrieve(
+        const stripeSubscription = (await stripe.subscriptions.retrieve(
           session.subscription as string
         )) as Stripe.Subscription
-        const priceId = subscription.items.data[0]?.price.id
+        const priceId = stripeSubscription.items.data[0]?.price.id
 
         if (!priceId) {
           console.error('No price ID found in subscription')
@@ -68,18 +68,18 @@ export async function POST(request: Request) {
           })
         }
 
-        const status = STRIPE_STATUS_MAP[subscription.status] || 'ACTIVE'
+        const status = STRIPE_STATUS_MAP[stripeSubscription.status] || 'ACTIVE'
 
         // Extract period values to ensure TypeScript recognizes them from Stripe.Subscription
-        const currentPeriodStart = new Date(subscription.current_period_start * 1000)
-        const currentPeriodEnd = new Date(subscription.current_period_end * 1000)
-        const cancelAtPeriodEnd = subscription.cancel_at_period_end
+        const currentPeriodStart = new Date(stripeSubscription.current_period_start * 1000)
+        const currentPeriodEnd = new Date(stripeSubscription.current_period_end * 1000)
+        const cancelAtPeriodEnd = stripeSubscription.cancel_at_period_end
 
         // Update company subscription
         await prisma.company.update({
           where: { id: companyId },
           data: {
-            stripeSubscriptionId: subscription.id,
+            stripeSubscriptionId: stripeSubscription.id,
             subscriptionStatus: status,
             subscriptionPlanId: plan.id,
           },
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
           where: { companyId },
           update: {
             planId: plan.id,
-            stripeSubscriptionId: subscription.id,
+            stripeSubscriptionId: stripeSubscription.id,
             status,
             currentPeriodStart,
             currentPeriodEnd,
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
           create: {
             companyId,
             planId: plan.id,
-            stripeSubscriptionId: subscription.id,
+            stripeSubscriptionId: stripeSubscription.id,
             status,
             currentPeriodStart,
             currentPeriodEnd,
