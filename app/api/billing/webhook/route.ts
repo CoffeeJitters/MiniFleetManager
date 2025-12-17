@@ -70,6 +70,11 @@ export async function POST(request: Request) {
 
         const status = STRIPE_STATUS_MAP[subscription.status] || 'ACTIVE'
 
+        // Extract period values to ensure TypeScript recognizes them from Stripe.Subscription
+        const currentPeriodStart = new Date(subscription.current_period_start * 1000)
+        const currentPeriodEnd = new Date(subscription.current_period_end * 1000)
+        const cancelAtPeriodEnd = subscription.cancel_at_period_end
+
         // Update company subscription
         await prisma.company.update({
           where: { id: companyId },
@@ -87,18 +92,18 @@ export async function POST(request: Request) {
             planId: plan.id,
             stripeSubscriptionId: subscription.id,
             status,
-            currentPeriodStart: new Date(subscription.current_period_start * 1000),
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            currentPeriodStart,
+            currentPeriodEnd,
+            cancelAtPeriodEnd,
           },
           create: {
             companyId,
             planId: plan.id,
             stripeSubscriptionId: subscription.id,
             status,
-            currentPeriodStart: new Date(subscription.current_period_start * 1000),
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            currentPeriodStart,
+            currentPeriodEnd,
+            cancelAtPeriodEnd,
           },
         })
 
