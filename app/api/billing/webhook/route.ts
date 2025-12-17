@@ -112,21 +112,21 @@ export async function POST(request: Request) {
 
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription
+        const stripeSubscription: Stripe.Subscription = event.data.object as Stripe.Subscription
         const company = await prisma.company.findUnique({
-          where: { stripeSubscriptionId: subscription.id },
+          where: { stripeSubscriptionId: stripeSubscription.id },
         })
 
         if (!company) {
-          console.error('Company not found for subscription:', subscription.id)
+          console.error('Company not found for subscription:', stripeSubscription.id)
           break
         }
 
-        let status = STRIPE_STATUS_MAP[subscription.status] || 'CANCELED'
+        let status = STRIPE_STATUS_MAP[stripeSubscription.status] || 'CANCELED'
         
         // If subscription is canceled and we're past the period end, ensure it's marked as CANCELED
-        if (subscription.status === 'canceled') {
-          const periodEnd = new Date(subscription.current_period_end * 1000)
+        if (stripeSubscription.status === 'canceled') {
+          const periodEnd = new Date(stripeSubscription.current_period_end * 1000)
           if (periodEnd < new Date()) {
             status = 'CANCELED'
           }
@@ -142,12 +142,12 @@ export async function POST(request: Request) {
 
         // Update subscription record with all relevant fields
         await prisma.subscription.updateMany({
-          where: { stripeSubscriptionId: subscription.id },
+          where: { stripeSubscriptionId: stripeSubscription.id },
           data: {
             status,
-            currentPeriodStart: new Date(subscription.current_period_start * 1000),
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+            currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+            cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
           },
         })
 
