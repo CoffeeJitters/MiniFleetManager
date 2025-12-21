@@ -10,16 +10,9 @@ import { Truck, AlertTriangle, Calendar, Plus } from 'lucide-react'
 import { format } from 'date-fns'
 
 async function getDashboardData(companyId: string) {
-  const [vehicles, schedules, overdueServices, upcomingServices] = await Promise.all([
+  const [vehicles, overdueServices, upcomingServices] = await Promise.all([
     prisma.vehicle.count({
       where: { companyId, status: 'ACTIVE' },
-    }),
-    prisma.maintenanceSchedule.findMany({
-      where: { companyId },
-      include: {
-        vehicle: true,
-        template: true,
-      },
     }),
     prisma.maintenanceSchedule.findMany({
       where: {
@@ -29,9 +22,22 @@ async function getDashboardData(companyId: string) {
         },
       },
       include: {
-        vehicle: true,
-        template: true,
+        vehicle: {
+          select: {
+            id: true,
+            make: true,
+            model: true,
+          },
+        },
+        template: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
+      take: 10, // Limit to 10 most recent overdue
+      orderBy: { nextDueDate: 'asc' },
     }),
     prisma.maintenanceSchedule.findMany({
       where: {
@@ -42,15 +48,27 @@ async function getDashboardData(companyId: string) {
         },
       },
       include: {
-        vehicle: true,
-        template: true,
+        vehicle: {
+          select: {
+            id: true,
+            make: true,
+            model: true,
+          },
+        },
+        template: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
+      take: 10, // Limit to 10 upcoming
+      orderBy: { nextDueDate: 'asc' },
     }),
   ])
 
   return {
     vehicleCount: vehicles,
-    schedules,
     overdueServices,
     upcomingServices,
   }

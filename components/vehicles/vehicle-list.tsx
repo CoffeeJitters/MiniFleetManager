@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -26,15 +26,19 @@ interface Vehicle {
 export function VehicleList({ vehicles }: { vehicles: Vehicle[] }) {
   const [search, setSearch] = useState('')
 
-  const filteredVehicles = vehicles.filter((v) => {
+  const filteredVehicles = useMemo(() => {
+    if (!search.trim()) return vehicles
+    
     const searchLower = search.toLowerCase()
-    return (
-      v.make.toLowerCase().includes(searchLower) ||
-      v.model.toLowerCase().includes(searchLower) ||
-      v.vin?.toLowerCase().includes(searchLower) ||
-      v.licensePlate?.toLowerCase().includes(searchLower)
-    )
-  })
+    return vehicles.filter((v) => {
+      return (
+        v.make.toLowerCase().includes(searchLower) ||
+        v.model.toLowerCase().includes(searchLower) ||
+        v.vin?.toLowerCase().includes(searchLower) ||
+        v.licensePlate?.toLowerCase().includes(searchLower)
+      )
+    })
+  }, [vehicles, search])
 
   return (
     <div className="space-y-4">

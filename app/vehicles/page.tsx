@@ -15,7 +15,17 @@ async function getVehicles(companyId: string) {
   return await prisma.vehicle.findMany({
     where: { companyId },
     orderBy: { createdAt: 'desc' },
-    include: {
+    select: {
+      id: true,
+      make: true,
+      model: true,
+      year: true,
+      vin: true,
+      licensePlate: true,
+      currentOdometer: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
       _count: {
         select: {
           maintenanceSchedules: true,

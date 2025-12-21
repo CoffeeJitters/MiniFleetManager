@@ -27,7 +27,7 @@ export async function scanAndCreateReminders() {
       },
       company: {
         subscriptionStatus: {
-          in: ACTIVE_SUBSCRIPTION_STATUSES,
+          in: [...ACTIVE_SUBSCRIPTION_STATUSES],
         },
       },
     },
@@ -122,7 +122,7 @@ export async function processPendingReminders() {
       status: 'PENDING',
       company: {
         subscriptionStatus: {
-          in: ACTIVE_SUBSCRIPTION_STATUSES,
+          in: [...ACTIVE_SUBSCRIPTION_STATUSES],
         },
       },
     },

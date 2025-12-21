@@ -15,10 +15,32 @@ async function getTemplates(companyId: string) {
     prisma.maintenanceTemplate.findMany({
       where: { isBuiltIn: true },
       orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        intervalMonths: true,
+        intervalMiles: true,
+        checklistItems: true,
+        isBuiltIn: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     }),
     prisma.maintenanceTemplate.findMany({
       where: { companyId, isBuiltIn: false },
       orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        intervalMonths: true,
+        intervalMiles: true,
+        checklistItems: true,
+        isBuiltIn: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     }),
   ])
 

@@ -11,10 +11,22 @@ async function getBillingData(companyId: string) {
   const [company, plans, subscription] = await Promise.all([
     prisma.company.findUnique({
       where: { id: companyId },
-      include: {
+      select: {
+        id: true,
+        subscriptionStatus: true,
+        stripeCustomerId: true,
         subscription: {
           include: {
-            plan: true,
+            plan: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                price: true,
+                interval: true,
+                stripePriceId: true,
+              },
+            },
           },
         },
       },
@@ -22,11 +34,28 @@ async function getBillingData(companyId: string) {
     prisma.plan.findMany({
       where: { isActive: true },
       orderBy: { price: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        interval: true,
+        stripePriceId: true,
+      },
     }),
     prisma.subscription.findUnique({
       where: { companyId },
       include: {
-        plan: true,
+        plan: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            interval: true,
+            stripePriceId: true,
+          },
+        },
       },
     }),
   ])
@@ -38,18 +67,26 @@ async function getBillingData(companyId: string) {
   }
 }
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: { refreshed?: string; success?: string }
+}) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
     redirect('/login')
   }
 
-  // Sync subscription status from Stripe before fetching billing data
-  try {
-    await syncSubscriptionStatus(session.user.companyId)
-  } catch (error) {
-    // Log error but don't fail the page load
-    console.error('Failed to sync subscription status:', error)
+  // Always sync subscription status from Stripe before fetching billing data
+  // Force sync if returning from Stripe portal
+  // Only sync if Stripe is configured
+  if (process.env.STRIPE_SECRET_KEY) {
+    try {
+      await syncSubscriptionStatus(session.user.companyId)
+    } catch (error) {
+      // Log error but don't fail the page load
+      console.error('Failed to sync subscription status:', error)
+    }
   }
 
   const { company, plans, subscription } = await getBillingData(session.user.companyId)

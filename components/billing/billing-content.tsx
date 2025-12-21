@@ -56,7 +56,9 @@ export function BillingContent({ company, plans, subscription, userRole }: Billi
     : false
 
   useEffect(() => {
-    if (searchParams.get('success') === 'true') {
+    if (searchParams.get('success') === 'true' || searchParams.get('refreshed') === 'true') {
+      // Force navigation to trigger server-side data refresh
+      router.push('/billing')
       router.refresh()
     }
     if (searchParams.get('canceled') === 'true') {
@@ -268,8 +270,11 @@ export function BillingContent({ company, plans, subscription, userRole }: Billi
       {plans.length === 0 && (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-gray-600 text-center">
-              No plans available at the moment. Please contact support.
+            <p className="text-gray-600 text-center mb-2">
+              No plans available at the moment.
+            </p>
+            <p className="text-sm text-gray-500 text-center">
+              Plans need to be added to the database. See STRIPE_SETUP.md for instructions.
             </p>
           </CardContent>
         </Card>

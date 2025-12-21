@@ -17,8 +17,20 @@ async function getUpcomingServices(companyId: string) {
       },
     },
     include: {
-      vehicle: true,
-      template: true,
+      vehicle: {
+        select: {
+          id: true,
+          make: true,
+          model: true,
+          year: true,
+        },
+      },
+      template: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
     orderBy: {
       nextDueDate: 'asc',

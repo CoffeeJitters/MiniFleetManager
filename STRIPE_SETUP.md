@@ -5,7 +5,7 @@
 1. Stripe account created
 2. API keys added to `.env`:
    - `STRIPE_SECRET_KEY`
-   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE`
    - `STRIPE_WEBHOOK_SECRET` (get this after creating webhook)
 
 ## Step 1: Create Products and Prices in Stripe

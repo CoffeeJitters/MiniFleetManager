@@ -16,8 +16,8 @@ export default withAuth(
           return true
         }
 
-        // Public API routes
-        if (pathname.startsWith('/api/auth/') || pathname === '/api/billing/webhook') {
+        // Public API routes - webhook must be accessible without auth
+        if (pathname.startsWith('/api/auth/') || pathname === '/api/billing/webhook' || pathname.startsWith('/api/billing/webhook')) {
           return true
         }
 
@@ -36,7 +36,8 @@ export const config = {
     '/admin/:path*',
     '/calendar/:path*',
     '/settings/:path*',
-    '/api/:path*',
+    // Match API routes but exclude webhook
+    '/api/:path((?!billing/webhook).*)',
     '/login',
     '/signup',
     '/billing',

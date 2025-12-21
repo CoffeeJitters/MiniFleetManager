@@ -11,12 +11,44 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    const vehicles = await prisma.vehicle.findMany({
-      where: { companyId: session.user.companyId },
-      orderBy: { createdAt: 'desc' },
-    })
+    const { searchParams } = new URL(request.url)
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const skip = (page - 1) * limit
 
-    return NextResponse.json(vehicles)
+    const [vehicles, total] = await Promise.all([
+      prisma.vehicle.findMany({
+        where: { companyId: session.user.companyId },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip,
+        select: {
+          id: true,
+          make: true,
+          model: true,
+          year: true,
+          vin: true,
+          licensePlate: true,
+          currentOdometer: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      prisma.vehicle.count({
+        where: { companyId: session.user.companyId },
+      }),
+    ])
+
+    return NextResponse.json({
+      vehicles,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    })
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 })
   }

@@ -103,6 +103,8 @@ model Vehicle {
   serviceEvents         ServiceEvent[]
   reminders             Reminder[]
 
+  @@index([companyId, status])
+  @@index([companyId, createdAt])
   @@map("vehicles")
 }
 
@@ -145,6 +147,8 @@ model MaintenanceSchedule {
   reminders Reminder[]
 
   @@unique([vehicleId, templateId])
+  @@index([companyId, nextDueDate])
+  @@index([companyId, vehicleId])
   @@map("maintenance_schedules")
 }
 
@@ -165,6 +169,8 @@ model ServiceEvent {
   template MaintenanceTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
   company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
+  @@index([companyId, vehicleId])
+  @@index([companyId, performedAt])
   @@map("service_events")
 }
 
@@ -184,6 +190,9 @@ model Reminder {
   schedule MaintenanceSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
   company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
+  @@index([companyId, status])
+  @@index([companyId, dueDate])
+  @@index([scheduleId])
   @@map("reminders")
 }
 

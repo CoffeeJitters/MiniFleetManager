@@ -7,6 +7,10 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ message: 'Stripe is not configured. Please add STRIPE_SECRET_KEY to your environment variables.' }, { status: 500 })
+    }
+
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
@@ -23,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const portalSession = await createPortalSession(company.stripeCustomerId, `${baseUrl}/billing`)
+    const portalSession = await createPortalSession(company.stripeCustomerId, `${baseUrl}/billing?refreshed=true`)
 
     return NextResponse.json({ url: portalSession.url })
   } catch (error: any) {

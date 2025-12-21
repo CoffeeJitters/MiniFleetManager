@@ -31,7 +31,7 @@ export async function hasActiveSubscription(companyId: string): Promise<boolean>
     where: { id: companyId },
     select: { subscriptionStatus: true },
   })
-  return company ? ACTIVE_SUBSCRIPTION_STATUSES.includes(company.subscriptionStatus) : false
+  return company ? ACTIVE_SUBSCRIPTION_STATUSES.includes(company.subscriptionStatus as typeof ACTIVE_SUBSCRIPTION_STATUSES[number]) : false
 }
 
 

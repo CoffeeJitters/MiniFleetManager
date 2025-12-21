@@ -6,6 +6,10 @@ import { createCheckoutSession } from '@/lib/stripe'
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ message: 'Stripe is not configured. Please add STRIPE_SECRET_KEY to your environment variables.' }, { status: 500 })
+    }
+
     const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
