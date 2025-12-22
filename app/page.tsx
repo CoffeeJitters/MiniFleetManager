@@ -5,26 +5,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <nav className="border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">MiniFleet Manager</h1>
-          <div className="flex gap-4">
+      <nav className="border-b safe-top">
+        <div className="container mx-auto px-3 md:px-4 py-4 flex justify-between items-center">
+          <h1 className="text-xl md:text-2xl font-bold">MiniFleet Manager</h1>
+          <div className="flex gap-2 md:gap-4">
             <Link href="/login">
-              <Button variant="ghost">Login</Button>
+              <Button variant="ghost" size="sm" className="md:size-default">Login</Button>
             </Link>
             <Link href="/signup">
-              <Button>Start Free Trial</Button>
+              <Button size="sm" className="md:size-default">Start Free Trial</Button>
             </Link>
           </div>
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4">
+      <main className="container mx-auto px-3 md:px-4 py-8 md:py-16">
+        <div className="text-center mb-12 md:mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 break-words">
             Small Fleet Maintenance Made Simple
           </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto break-words">
             Schedule preventive maintenance, track service history, and send automated reminders 
             for your small commercial fleet. No more paper spreadsheets.
           </p>

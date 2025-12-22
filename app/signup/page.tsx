@@ -83,6 +83,7 @@ export default function SignupPage() {
                 type="email"
                 required
                 placeholder="you@example.com"
+                className="break-anywhere"
               />
             </div>
             <div className="space-y-2">

@@ -45,7 +45,7 @@ export default async function ScheduleMaintenancePage({
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Schedule Maintenance</h1>
+          <h1 className="text-2xl md:text-3xl font-bold break-words">Schedule Maintenance</h1>
           <p className="text-gray-600 mt-1">Create a maintenance schedule for a vehicle</p>
         </div>
         <ScheduleMaintenanceForm

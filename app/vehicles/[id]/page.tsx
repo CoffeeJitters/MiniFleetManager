@@ -55,28 +55,30 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl md:text-3xl font-bold break-words">
               {vehicle.year} {vehicle.make} {vehicle.model}
             </h1>
-            <p className="text-gray-600 mt-1">
-              {vehicle.licensePlate && `Plate: ${vehicle.licensePlate} • `}
-              {vehicle.vin && `VIN: ${vehicle.vin}`}
+            <p className="text-gray-600 mt-1 break-anywhere">
+              {vehicle.licensePlate && <span>Plate: {vehicle.licensePlate}</span>}
+              {vehicle.licensePlate && vehicle.vin && <span> • </span>}
+              {vehicle.vin && <span>VIN: {vehicle.vin}</span>}
             </p>
           </div>
           {canEdit && (
-            <div className="flex gap-2">
-              <Link href={`/vehicles/${vehicle.id}/edit`}>
-                <Button variant="outline">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Link href={`/vehicles/${vehicle.id}/edit`} className="w-full sm:w-auto">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
               </Link>
-              <Link href={`/maintenance/schedule?vehicleId=${vehicle.id}`}>
-                <Button>
+              <Link href={`/maintenance/schedule?vehicleId=${vehicle.id}`} className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto">
                   <Plus className="h-4 w-4 mr-2" />
-                  Schedule Maintenance
+                  <span className="hidden sm:inline">Schedule Maintenance</span>
+                  <span className="sm:hidden">Schedule</span>
                 </Button>
               </Link>
             </div>

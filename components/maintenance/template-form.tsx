@@ -126,7 +126,7 @@ export function MaintenanceTemplateForm({
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="intervalMonths">Interval (Months)</Label>
               <Input
@@ -167,8 +167,9 @@ export function MaintenanceTemplateForm({
                   }
                 }}
                 placeholder="Add checklist item..."
+                className="flex-1"
               />
-              <Button type="button" onClick={addChecklistItem} variant="outline">
+              <Button type="button" onClick={addChecklistItem} variant="outline" className="flex-shrink-0">
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -204,11 +205,11 @@ export function MaintenanceTemplateForm({
             </div>
           )}
 
-          <div className="flex gap-4">
-            <Button type="submit" disabled={loading || !hasActiveSubscription}>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button type="submit" disabled={loading || !hasActiveSubscription} className="w-full sm:w-auto">
               {loading ? 'Saving...' : templateId ? 'Update Template' : 'Create Template'}
             </Button>
-            <Button type="button" variant="outline" onClick={() => router.back()}>
+            <Button type="button" variant="outline" onClick={() => router.back()} className="w-full sm:w-auto">
               Cancel
             </Button>
           </div>

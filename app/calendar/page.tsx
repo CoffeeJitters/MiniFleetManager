@@ -53,7 +53,7 @@ export default async function CalendarPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Calendar</h1>
+          <h1 className="text-2xl md:text-3xl font-bold break-words">Calendar</h1>
           <p className="text-gray-600 mt-1">Upcoming maintenance services</p>
         </div>
 
@@ -69,12 +69,12 @@ export default async function CalendarPage() {
             {services.map((schedule) => (
               <Card key={schedule.id}>
                 <CardContent className="p-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-semibold">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold break-words">
                         {schedule.template.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-sm text-gray-600 mt-1 break-words">
                         {schedule.vehicle.year} {schedule.vehicle.make} {schedule.vehicle.model}
                       </p>
                       {schedule.nextDueDate && (
@@ -86,10 +86,12 @@ export default async function CalendarPage() {
                     <a
                       href={`/api/calendar/ics?scheduleId=${schedule.id}`}
                       download
+                      className="self-start sm:self-auto"
                     >
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
                         <Download className="h-4 w-4 mr-2" />
-                        Add to Calendar
+                        <span className="hidden sm:inline">Add to Calendar</span>
+                        <span className="sm:hidden">Download</span>
                       </Button>
                     </a>
                   </div>

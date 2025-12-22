@@ -52,22 +52,23 @@ export default async function VehiclesPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Vehicles</h1>
+            <h1 className="text-2xl md:text-3xl font-bold break-words">Vehicles</h1>
             <p className="text-gray-600 mt-1">Manage your fleet vehicles</p>
           </div>
           {vehicles.length < 20 ? (
-            <Link href="/vehicles/new">
-              <Button>
+            <Link href="/vehicles/new" className="self-start sm:self-auto">
+              <Button className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Vehicle
               </Button>
             </Link>
           ) : (
-            <Button disabled>
+            <Button disabled className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
-              Fleet Limit Reached (20 vehicles)
+              <span className="hidden sm:inline">Fleet Limit Reached (20 vehicles)</span>
+              <span className="sm:hidden">Limit Reached</span>
             </Button>
           )}
         </div>

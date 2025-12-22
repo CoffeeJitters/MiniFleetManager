@@ -53,8 +53,8 @@ export default async function LogServicePage({
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Log Service</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold break-words">Log Service</h1>
+          <p className="text-gray-600 mt-1 break-words">
             Record a completed maintenance service for {vehicle.year} {vehicle.make} {vehicle.model}
           </p>
         </div>

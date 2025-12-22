@@ -85,21 +85,21 @@ export default async function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome back, {session.user.name || session.user.email}</p>
+            <h1 className="text-2xl md:text-3xl font-bold break-words">Dashboard</h1>
+            <p className="text-gray-600 mt-1 break-anywhere">Welcome back, {session.user.name || session.user.email}</p>
           </div>
           {data.vehicleCount === 0 ? (
-            <Link href="/vehicles/new">
-              <Button>
+            <Link href="/vehicles/new" className="self-start sm:self-auto">
+              <Button className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Your First Vehicle
               </Button>
             </Link>
           ) : (
-            <Link href="/vehicles/new">
-              <Button variant="outline">
+            <Link href="/vehicles/new" className="self-start sm:self-auto">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Vehicle
               </Button>
@@ -190,18 +190,18 @@ export default async function DashboardPage() {
                       return (
                         <div
                           key={schedule.id}
-                          className="flex justify-between items-center p-3 border rounded-lg"
+                          className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 border rounded-lg"
                         >
-                          <div>
-                            <p className="font-medium">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium break-words">
                               {schedule.vehicle.make} {schedule.vehicle.model} - {schedule.template.name}
                             </p>
                             <p className="text-sm text-gray-600">
                               Due: {format(new Date(schedule.nextDueDate!), 'MMM d, yyyy')} ({daysOverdue} days overdue)
                             </p>
                           </div>
-                          <Link href={`/vehicles/${schedule.vehicleId}`}>
-                            <Button variant="outline" size="sm">View</Button>
+                          <Link href={`/vehicles/${schedule.vehicleId}`} className="self-start sm:self-auto">
+                            <Button variant="outline" size="sm" className="w-full sm:w-auto">View</Button>
                           </Link>
                         </div>
                       )
@@ -228,18 +228,18 @@ export default async function DashboardPage() {
                       return (
                         <div
                           key={schedule.id}
-                          className="flex justify-between items-center p-3 border rounded-lg"
+                          className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-3 border rounded-lg"
                         >
-                          <div>
-                            <p className="font-medium">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium break-words">
                               {schedule.vehicle.make} {schedule.vehicle.model} - {schedule.template.name}
                             </p>
                             <p className="text-sm text-gray-600">
                               Due: {format(new Date(schedule.nextDueDate!), 'MMM d, yyyy')} (in {daysUntil} days)
                             </p>
                           </div>
-                          <Link href={`/vehicles/${schedule.vehicleId}`}>
-                            <Button variant="outline" size="sm">View</Button>
+                          <Link href={`/vehicles/${schedule.vehicleId}`} className="self-start sm:self-auto">
+                            <Button variant="outline" size="sm" className="w-full sm:w-auto">View</Button>
                           </Link>
                         </div>
                       )

@@ -59,9 +59,9 @@ export function VehicleDetail({ vehicle, canEdit }: VehicleDetailProps) {
                     key={schedule.id}
                     className={`p-3 border rounded-lg ${isOverdue ? 'border-red-200 bg-red-50' : ''}`}
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{schedule.template.name}</p>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium break-words">{schedule.template.name}</p>
                         {schedule.nextDueDate && (
                           <p className="text-sm text-gray-600">
                             Due: {format(new Date(schedule.nextDueDate), 'MMM d, yyyy')}
@@ -80,8 +80,8 @@ export function VehicleDetail({ vehicle, canEdit }: VehicleDetailProps) {
                         )}
                       </div>
                       {canEdit && (
-                        <Link href={`/maintenance/log?vehicleId=${vehicle.id}&templateId=${schedule.templateId}`}>
-                          <Button variant="outline" size="sm">Log Service</Button>
+                        <Link href={`/maintenance/log?vehicleId=${vehicle.id}&templateId=${schedule.templateId}`} className="self-start sm:self-auto">
+                          <Button variant="outline" size="sm" className="w-full sm:w-auto">Log Service</Button>
                         </Link>
                       )}
                     </div>
@@ -104,14 +104,14 @@ export function VehicleDetail({ vehicle, canEdit }: VehicleDetailProps) {
           ) : (
             <div className="space-y-2">
               {vehicle.serviceEvents.map((event: any) => (
-                <div key={event.id} className="flex justify-between items-center p-3 border rounded-lg">
+                <div key={event.id} className="p-3 border rounded-lg">
                   <div>
-                    <p className="font-medium">{event.template.name}</p>
+                    <p className="font-medium break-words">{event.template.name}</p>
                     <p className="text-sm text-gray-600">
                       {format(new Date(event.performedAt), 'MMM d, yyyy')} •{' '}
                       {event.odometerAtService.toLocaleString()} miles
                     </p>
-                    {event.notes && <p className="text-sm text-gray-600 mt-1">{event.notes}</p>}
+                    {event.notes && <p className="text-sm text-gray-600 mt-1 break-words">{event.notes}</p>}
                   </div>
                 </div>
               ))}

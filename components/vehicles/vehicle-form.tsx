@@ -92,7 +92,7 @@ export function VehicleForm({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="make">Make *</Label>
               <Input id="make" {...register('make')} placeholder="Ford" />
@@ -118,12 +118,12 @@ export function VehicleForm({
 
             <div className="space-y-2">
               <Label htmlFor="vin">VIN</Label>
-              <Input id="vin" {...register('vin')} placeholder="1HGBH41JXMN109186" />
+              <Input id="vin" {...register('vin')} placeholder="1HGBH41JXMN109186" className="break-anywhere" />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="licensePlate">License Plate</Label>
-              <Input id="licensePlate" {...register('licensePlate')} placeholder="ABC-1234" />
+              <Input id="licensePlate" {...register('licensePlate')} placeholder="ABC-1234" className="break-anywhere" />
             </div>
 
             <div className="space-y-2">
@@ -177,11 +177,11 @@ export function VehicleForm({
             </div>
           )}
 
-          <div className="flex gap-4">
-            <Button type="submit" disabled={loading || !hasActiveSubscription}>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button type="submit" disabled={loading || !hasActiveSubscription} className="w-full sm:w-auto">
               {loading ? 'Saving...' : vehicleId ? 'Update Vehicle' : 'Create Vehicle'}
             </Button>
-            <Button type="button" variant="outline" onClick={() => router.back()}>
+            <Button type="button" variant="outline" onClick={() => router.back()} className="w-full sm:w-auto">
               Cancel
             </Button>
           </div>
